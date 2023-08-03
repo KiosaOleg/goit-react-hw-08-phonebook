@@ -2,8 +2,8 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { SearchInputSt } from './SearchInput.styled';
 import { useDispatch, useSelector } from 'react-redux';
-import { selectFilter } from 'redux/selectors';
-import { setFilter } from 'redux/filterSlice';
+import { selectFilter } from 'redux/contact/selectors';
+import { setFilter } from 'redux/contact/filterSlice';
 
 export default function SearchInput() {
   const dispatch = useDispatch();
@@ -15,6 +15,7 @@ export default function SearchInput() {
 
   return (
     <div>
+      {/* <p>Search contact</p> */}
       <SearchInputSt
         type="text"
         name={filter}

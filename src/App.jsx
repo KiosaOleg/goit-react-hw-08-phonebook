@@ -1,33 +1,79 @@
+import { motion } from 'framer-motion';
 import './App.css';
-import React, { useEffect } from 'react';
+import React from 'react';
 
-import { AppContainer, H1, H2 } from './App.styled';
+import { useEffect, lazy } from 'react';
+import { Route, Routes } from 'react-router-dom';
+import Layout from 'components/Layout/Layout';
+import { PrivateRoute } from 'components/PrivateRoute';
+import { RestrictedRoute } from 'components/RestrictedRoute';
+import { refreshUser } from 'redux/auth/operations';
+import { useAuth } from 'hooks';
 
-import Phonebook from './components/Phonebook/Phonebook';
-import SearchInput from './components/SearchInput/SearchInput';
-import ContactList from './components/ContactList/ContactList';
-import { useDispatch, useSelector } from 'react-redux';
-import { selectError, selectIsLoading } from 'redux/selectors';
-import { fetchContacts } from 'redux/operations';
+import { useDispatch } from 'react-redux';
+import { AppContainer } from 'App.styled';
+const HomePage = lazy(() => import('./components/pages/Home/Home'));
+const RegisterPage = lazy(() => import('./components/pages/Register/Register'));
+const LoginPage = lazy(() => import('./components/pages/Login/Login'));
+const ContactsPage = lazy(() =>
+  import('./components/pages/Contacts/ContactsPage')
+);
 
 export default function App() {
   const dispatch = useDispatch();
-  const isLoading = useSelector(selectIsLoading);
-  const error = useSelector(selectError);
+  const { isRefreshing } = useAuth();
+
+  const listVAriatns = {
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: {},
+    },
+    hidden: { opacity: 0, z: -100 },
+  };
 
   useEffect(() => {
-    dispatch(fetchContacts());
+    dispatch(refreshUser());
   }, [dispatch]);
 
-  return (
+  return isRefreshing ? (
+    <b>Refreshing user...</b>
+  ) : (
     <AppContainer>
-      <H1>Phonebook</H1>
-      <Phonebook />
-
-      <H2>Contacts</H2>
-      <SearchInput />
-      {isLoading && !error && <b>Loading...</b>}
-      <ContactList />
+      <motion.div variants={listVAriatns} initial="hidden" animate="visible">
+        <Routes>
+          <Route path="/" element={<Layout />}>
+            <Route index element={<HomePage />} />
+            <Route
+              path="/register"
+              element={
+                <RestrictedRoute
+                  redirectTo="/contacts"
+                  component={<RegisterPage />}
+                />
+              }
+            />
+            <Route
+              path="/login"
+              element={
+                <RestrictedRoute
+                  redirectTo="/contacts"
+                  component={<LoginPage />}
+                />
+              }
+            />
+            <Route
+              path="/contacts"
+              element={
+                <PrivateRoute
+                  redirectTo="/login"
+                  component={<ContactsPage />}
+                />
+              }
+            />
+          </Route>
+        </Routes>
+      </motion.div>
     </AppContainer>
   );
 }

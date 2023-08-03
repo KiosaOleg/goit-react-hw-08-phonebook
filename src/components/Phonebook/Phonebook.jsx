@@ -1,14 +1,17 @@
 import { nanoid } from 'nanoid';
 import React, { useState } from 'react';
+
+import { addContact } from 'redux/contact/operations';
+import { selectContacts } from 'redux/contact/selectors';
+
+import PropTypes from 'prop-types';
 import { HiUserAdd } from 'react-icons/hi';
 import { NameLabel, AddContactBtn, Input } from './Phonebook.styled';
 import { useDispatch, useSelector } from 'react-redux';
-import { addContact } from 'redux/operations';
-import { selectContacts } from 'redux/selectors';
 
 export default function Phonebook() {
   const [name, setName] = useState('');
-  const [phoneNumber, setPhoneNumber] = useState('');
+  const [number, setNumber] = useState('');
 
   const nameInputId = nanoid();
   const phoneNumberInputId = nanoid();
@@ -24,8 +27,8 @@ export default function Phonebook() {
         setName(value);
         break;
 
-      case 'phoneNumber':
-        setPhoneNumber(value);
+      case 'number':
+        setNumber(value);
         break;
 
       default:
@@ -37,14 +40,13 @@ export default function Phonebook() {
     event.preventDefault();
     const contact = {
       name,
-      phoneNumber,
-      id: nanoid(),
+      number,
+      // id: nanoid(),
     };
 
     const checkContact = contacts.some(
       contact => contact.name.toLowerCase() === name.toLowerCase()
     );
-
     checkContact
       ? alert(`${name} is already in contact`)
       : dispatch(addContact(contact));
@@ -54,7 +56,7 @@ export default function Phonebook() {
 
   const resetSubmit = () => {
     setName('');
-    setPhoneNumber('');
+    setNumber('');
   };
   return (
     <div>
@@ -74,23 +76,29 @@ export default function Phonebook() {
           />
         </NameLabel>
         <label htmlFor={phoneNumberInputId}>
-          Phone number:
+          Number:
           <Input
             type="tel"
-            name="phoneNumber"
+            name="number"
             pattern="^(\+?[0-9.\(\)\-\s]*)$"
             title="Phone number must be digits and can contain spaces, dashes, parentheses and can start with +"
             required
-            value={phoneNumber}
+            value={number}
             onChange={handleChange}
             id={phoneNumberInputId}
             placeholder="Please write number"
           />
         </label>
         <AddContactBtn tupe="submit">
-          <HiUserAdd size={16} fill="#7f24a8" />
+          <HiUserAdd size={16} />
         </AddContactBtn>
       </form>
     </div>
   );
 }
+
+Phonebook.prototypes = {
+  name: PropTypes.string.isRequired,
+  number: PropTypes.string.isRequired,
+  onSubmit: PropTypes.func.isRequired,
+};
